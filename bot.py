@@ -196,9 +196,11 @@ def forecast_case(case: dict) -> dict:
     p1 = max(1.0, float(first["viewers"]))
     x = max(X_MIN, min(X_MAX, math.log(p1) - X0))
     fits = fit(select_comparables(case))
+    # Emit the requested hours in ascending order, whatever order the
+    # case lists them in; an empty forecast list means hours 2..24.
+    requested = {row["hour"] for row in case.get("forecast", [])} or set(range(2, 25))
     rows = []
-    for row in case["forecast"]:
-        hour = row["hour"]
+    for hour in sorted(h for h in requested if 2 <= h <= 24):
         a, b, resid = fits[hour]
         centre = a + b * x
         if len(resid) >= 5:
